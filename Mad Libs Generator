@@ -1,0 +1,304 @@
+from drafter import *
+from dataclasses import dataclass
+from bakery import assert_equal
+
+"""
+Site: "Madlibs Generator"
+Purpose: The user picks a genre and fills in blanks to create a madlib
+"""
+
+@dataclass
+class State:
+    message: str
+    animals: bool
+    science: bool
+    food: bool
+    noun1: str
+    adj1: str
+    adj2: str
+    verb1: str
+    noun2: str
+    verb2: str
+    
+@route
+def index(state: State) -> Page:
+    """
+    Cover page with start button
+    
+    Arg:
+        message: starting message
+    Returns:
+        str: Madlibs Generator
+    """
+    state.message="Madlibs Generator"
+    return Page(state, [
+        "Begin Madlib",
+        state.message,
+        Button("Start", first_pg)
+    ])
+
+@route
+def first_pg(state: State) -> Page:
+    """
+    First real page, has the select genre checkboxes
+    
+    Args:
+        message: tells to select a genre
+        animals: whether it's selected or not
+        science: whether it's selected or not
+        food: whether it's selected or not
+    Returns:
+        str: select your genre
+        bool: animal true or false
+        bool: science true or false
+        bool: food true or false
+    """
+    state.message = "Select your genre"
+    return Page(state, [
+        state.message,
+        "Animals",
+        CheckBox("animals", state.animals),
+        "Science",
+        CheckBox("science", state.science),
+        "Food",
+        CheckBox("food", state.food),
+        Button("Next", genre_choice),
+        Button("Restart", index)
+    ])
+
+@route
+def genre_choice(state:State, animals:bool, science:bool, food:bool) -> Page:
+    """
+    Has boxes for words, shows similar pages, but different for checkbox chosen
+    
+    Args:
+        message: says to fill in blanks
+        animals: whether it's selected or not
+        science: whether it's selected or not
+        food: whether it's selected or not
+        noun1: first noun
+        noun2: second noun
+        adj1: first adjective
+        adj2: second adjective
+        verb1: first verb
+        verb2: second verb
+    Returns:
+        str: fill in blanks
+        bool: animal true or false
+        bool: science true or false
+        bool: food true or false
+        str: noun
+        str: noun
+        str: adjective
+        str: adjective
+        str: verb
+        str: verb
+    """
+    state.animals=animals
+    state.science=science
+    state.food=food
+    if animals==True:
+        state.message= "Fill in the blanks"
+        return Page(state, [
+            state.message,
+            "You chose animals",
+            TextBox("noun1", state.noun1),
+            TextBox("adjective1", state.adj1),
+            TextBox("adjective2", state.adj2),
+            LineBreak(),
+            TextBox("verb1", state.verb1),
+            TextBox("noun2", state.noun2),
+            TextBox("verb2", state.verb2),
+            Button("Next", final_pg)
+        ])    
+    elif science==True:
+        state.message= "Fill in the blanks"
+        return Page(state, [
+            state.message,
+            "You chose science",
+            TextBox("noun1", state.noun1),
+            TextBox("adjective1", state.adj1),
+            TextBox("adjective2", state.adj2),
+            LineBreak(),
+            TextBox("verb1", state.verb1),
+            TextBox("noun2", state.noun2),
+            TextBox("verb2", state.verb2),
+            Button("Next", final_pg)
+        ])
+    elif food==True:
+        state.message= "Fill in the blanks"
+        return Page(state, [
+            state.message,
+            "You chose food",
+            TextBox("noun1", state.noun1),
+            TextBox("adjective1", state.adj1),
+            TextBox("adjective2", state.adj2),
+            LineBreak(),
+            TextBox("verb1", state.verb1),
+            TextBox("noun2", state.noun2),
+            TextBox("verb2", state.verb2),
+            Button("Next", final_pg)
+        ])
+    else:
+        state.message= "Please choose an option"
+        return Page(state, [
+            state.message,
+            Button("Go Back", first_pg)
+        ])
+
+@route
+def final_pg(state:State, noun1:str, noun2:str, adjective1:str, adjective2:str, verb1:str, verb2:str) -> Page:
+    """
+    Final page displaying the final madlib
+    
+    Args:
+        animals: whether it's selected or not
+        science: whether it's selected or not
+        food: whether it's selected or not
+        noun1: first noun
+        noun2: second noun
+        adj1: first adjective
+        adj2: second adjective
+        verb1: first verb
+        verb2: second verb
+    Returns:
+        str: fill in blanks
+        bool: animal true or false
+        bool: science true or false
+        bool: food true or false
+        str: noun
+        str: noun
+        str: adjective
+        str: adjective
+        str: verb
+        str: verb
+    """
+    state.noun1 = noun1
+    state.adj1 = adjective1
+    state.adj2 = adjective2
+    state.verb1 = verb1
+    state.noun2 = noun2
+    state.verb2 = verb2
+    if state.animals==True:
+        return Page(state, [
+            "The cat walked down the "+state.noun1,
+            "Then the "+state.adj1+" cat fell, until the "+state.adj2+" dog stopped it.",
+            "The animals "+state.verb1+" until yet another "+state.noun2+" came by.",
+            state.verb2+" said the animals, leaving while the others walked home.",
+            LineBreak(),
+            Button("Restart", index)
+        ])
+    elif state.science==True:
+        return Page(state, [
+            "BOOM!!! A giant "+state.noun1+" just blew up in the harbor!",
+            "We the "+state.adj1+" people of lego city must stop the "+state.adj2+" people.",
+            "BUT, as we stop them, they decide to "+state.verb1+" out of the sky.",
+            "Without the help of "+state.noun2+" we can't make it unless we "+state.verb2,
+            LineBreak(),
+            Button("Restart",index)
+        ])
+    elif state.food==True:
+        return Page(state, [
+            "Hmmm yummy "+state.noun1+", I can't believe you made this "+state.adj1,
+            "I could never make something like this "+state.adj2+" food.",
+            "But, I don't know if it might "+state.verb1+" the bowl into the "+state.noun2,
+            "Either way, I love this so much I might "+state.verb2,
+            LineBreak(),
+            Button("Restart",index)
+        ])
+    else:
+        return index
+    
+assert_equal(index(State(message='Madlibs Generator', animals=False,
+                         science=False, food=False, noun1='Noun', adj1='Adjective',
+                         adj2='Adjective', verb1='Verb', noun2='Noun', verb2='Verb')),
+             Page(state=State(message='Madlibs Generator',
+                     animals=False,
+                     science=False,
+                     food=False,
+                     noun1='Noun',
+                     adj1='Adjective',
+                     adj2='Adjective',
+                     verb1='Verb',
+                     noun2='Noun',
+                     verb2='Verb'),
+                 content=['Begin Madlib',
+                      'Madlibs Generator',
+                      Button(text='Start', url='/first_pg', external=False)]))
+
+assert_equal(genre_choice(State(message='Select your genre', animals=False, science=False,
+                                food=False, noun1='Noun', adj1='Adjective', adj2='Adjective', verb1='Verb',
+                                noun2='Noun', verb2='Verb'), animals=True, science=True, food=True),
+             Page(state=State(message='Fill in the blanks',
+                 animals=True,
+                 science=True,
+                 food=True,
+                 noun1='Noun',
+                 adj1='Adjective',
+                 adj2='Adjective',
+                 verb1='Verb',
+                 noun2='Noun',
+                 verb2='Verb'),
+     content=['Fill in the blanks',
+              'You chose animals',
+              TextBox(name='noun1', kind='text', default_value='Noun'),
+              TextBox(name='adjective1',
+                      kind='text',
+                      default_value='Adjective'),
+              TextBox(name='adjective2',
+                      kind='text',
+                      default_value='Adjective'),
+              LineBreak(),
+              TextBox(name='verb1', kind='text', default_value='Verb'),
+              TextBox(name='noun2', kind='text', default_value='Noun'),
+              TextBox(name='verb2', kind='text', default_value='Verb'),
+              Button(text='Next', url='/final_pg', external=False)]))
+
+assert_equal(final_pg(State(message='Fill in the blanks', animals=True, science=False,
+                            food=False, noun1='Noun', adj1='Adjective', adj2='Adjective',
+                            verb1='Verb', noun2='Noun', verb2='Verb'), noun1='', adjective1='',
+                      adjective2='', verb1='', noun2='', verb2=''),
+             Page(state=State(message='Fill in the blanks',
+                 animals=True,
+                 science=False,
+                 food=False,
+                 noun1='',
+                 adj1='',
+                 adj2='',
+                 verb1='',
+                 noun2='',
+                 verb2=''),
+     content=['The cat walked down the ',
+              'Then the  cat fell, until the  dog stopped it.',
+              'The animals  until yet another  came by.',
+              ' said the animals, leaving while the others walked home.',
+              LineBreak(),
+              Button(text='Restart', url='/', external=False)]))
+
+assert_equal(final_pg(State(message='Fill in the blanks', animals=False,
+                            science=True, food=False, noun1='"uhoh"', adj1='"wow"',
+                            adj2="'wooohooo'", verb1='"sheesshhhh"', noun2='""""""',
+                            verb2="''''''"), noun1='"uhoh"', adjective1='"wow"',
+                      adjective2="'wooohooo'", verb1='"sheesshhhh"', noun2='""""""', verb2='wow'),
+            Page(state=State(message='Fill in the blanks',
+                 animals=False,
+                 science=True,
+                 food=False,
+                 noun1='"uhoh"',
+                 adj1='"wow"',
+                 adj2="'wooohooo'",
+                 verb1='"sheesshhhh"',
+                 noun2='""""""',
+                 verb2='wow'),
+     content=['BOOM!!! A giant "uhoh" just blew up in the harbor!',
+              'We the "wow" people of lego city must stop the \'wooohooo\' '
+              'people.',
+              'BUT, as we stop them, they decide to "sheesshhhh" out of the '
+              'sky.',
+              'Without the help of """""" we can\'t make it unless we wow',
+              LineBreak(),
+              Button(text='Restart', url='/', external=False)])) 
+             
+    
+hide_debug_information()
+start_server(State("Madlibs Generator",False,False,False,"Noun","Adjective","Adjective","Verb","Noun","Verb"))
